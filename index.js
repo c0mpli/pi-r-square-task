@@ -16,15 +16,8 @@ const app = express();
 app.use(cookieparser());
 app.use(express.json());
 
-const storage = multer.diskStorage({
-    destination: './public/upload',
-    filename: (req,file,cb)=>{
-        return cb(null, `${req.cookies.token}_${Date.now()}${path.extname(file.originalname)}`)
-    }
-})
-const upload = multer({
-    storage:storage
-})
+const saveDirectory = './public/upload'
+
 
 app.post('/create_new_storage', (req,res)=>{
     return res
@@ -38,6 +31,17 @@ app.post('/create_new_storage', (req,res)=>{
 })
 
 
+
+const storage = multer.diskStorage({
+    destination: saveDirectory,
+    filename: (req,file,cb)=>{
+        return cb(null, `${req.cookies.token}_${Date.now()}${path.extname(file.originalname)}`)
+    }
+})
+const upload = multer({
+    storage:storage
+})
+
 app.post('/upload_file',ensureToken,upload.single('my_file'),(req,res)=>{
     res.json(
         {
@@ -46,6 +50,8 @@ app.post('/upload_file',ensureToken,upload.single('my_file'),(req,res)=>{
         }
     )
 })
+
+
 
 
 
@@ -74,12 +80,43 @@ app.post('/text_file_to_audio',ensureToken,(req,res)=>{
 })
 
 
-app.get('/merge_image_and_audio',ensureToken,(req,res)=>{
-    
+app.post('/merge_image_and_audio',ensureToken,(req,res)=>{
+    const {imagePath} = req.body
+    const {audioPath} = req.body
+
+    //verify if file exists or no
+    if(fs.existsSync(imagePath) && fs.existsSync(audioPath)){
+
+    } else{
+        res.sendStatus(404);
+    }
 })
 
-app.get('/download',(req,res)=>{
+app.get('/download',ensureToken,(req,res)=>{
 
+})
+
+
+app.get('/my_upload_file',ensureToken,(req,res)=>{
+    var allFileNames=[];
+    fs.readdir(saveDirectory, (err, files) => {
+        if (err){
+
+            return res.json({
+              "message": "Error reading directory."  
+            })
+        } else {
+          files.forEach(file => {
+            if(file.includes(req.cookies.token)) //checks if file is upload by that user only or some other user
+            allFileNames.push(file)
+          })
+
+          return res.json({
+                "status": "ok",
+                "data": allFileNames
+          })
+        }
+      })
 })
 
 
@@ -94,6 +131,8 @@ app.get('/download',(req,res)=>{
 //         }
 //     });
 // }
+
+
 
 //ensure if token is present in cookies
 function ensureToken(req,res,next){

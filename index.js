@@ -36,15 +36,28 @@ app.post('/create_new_storage', (req,res)=>{
 })
 
 
-app.post('/upload_file',upload.single('profile'),ensureToken,(req,res)=>{
+app.post('/upload_file',upload.single('my_file'),ensureToken,(req,res)=>{
     jwt.verify(req.token,process.env.TOKEN_SECRET,function(err,data){
         if(err){
            return res.sendStatus(403);
         } else{
-            console.log(req.file)
+            res.json(
+                {
+                    "status": "ok",
+                    "file_path": `${req.file.destination.split('.')[1]}/${req.file.filename}`
+                 }
+                
+            )
         }
     })
 })
+
+
+
+
+
+app.post('')
+
 
 function ensureToken(req,res,next){
     const bearerHeader = req.cookies.token;

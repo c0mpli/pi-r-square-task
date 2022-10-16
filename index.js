@@ -4,6 +4,9 @@ const multer= require('multer');
 const path = require('path');
 const fs = require('fs');
 const gTTS = require('gtts');
+let videoStitch = require('video-stitch');
+let videoMerge = videoStitch.merge;
+
 const { v4: uuidv4 } = require('uuid');
 
 
@@ -53,9 +56,6 @@ app.post('/upload_file',ensureToken,upload.single('my_file'),(req,res)=>{
 })
 
 
-
-
-
 app.post('/text_file_to_audio',ensureToken,(req,res)=>{
     const { file_path } = req.body;
     //verify if file exists or no
@@ -93,7 +93,19 @@ app.post('/merge_image_and_audio',ensureToken,(req,res)=>{
     }
 })
 
-app.get('/download_file',(req,res)=>{
+
+app.post('/merge_all_video',ensureToken,(req,res)=>{
+    const videoPaths = req.body.video_file_path_list
+    const videoFileNames = []
+    for( var i=0;i<videoPaths.length;i++){
+        const temp = videoPaths[i].split('/')
+        videoFileNames.push(temp[temp.length-1])
+    }
+
+})
+
+
+app.get('/download_file',ensureToken,(req,res)=>{
     const path = req.query.file_path 
     
     //verify if file exists or no

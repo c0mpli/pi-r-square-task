@@ -38,6 +38,7 @@ const storage = multer.diskStorage({
         return cb(null, `${req.cookies.token}_${Date.now()}${path.extname(file.originalname)}`)
     }
 })
+
 const upload = multer({
     storage:storage
 })
@@ -92,8 +93,16 @@ app.post('/merge_image_and_audio',ensureToken,(req,res)=>{
     }
 })
 
-app.get('/download',ensureToken,(req,res)=>{
-
+app.get('/download_file',(req,res)=>{
+    const path = req.query.file_path 
+    
+    //verify if file exists or no
+    if(fs.existsSync(path)){
+        res.download(path)
+    }
+    else{
+        res.sendStatus(404)
+    }
 })
 
 
@@ -101,7 +110,6 @@ app.get('/my_upload_file',ensureToken,(req,res)=>{
     var allFileNames=[];
     fs.readdir(saveDirectory, (err, files) => {
         if (err){
-
             return res.json({
               "message": "Error reading directory."  
             })

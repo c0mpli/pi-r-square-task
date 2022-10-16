@@ -5,12 +5,16 @@ const path = require('path');
 const fs = require('fs');
 const gTTS = require('gtts');
 let videoStitch = require('video-stitch');
+const {exec} = require('child_process')
 let videoMerge = videoStitch.merge;
 
 const { v4: uuidv4 } = require('uuid');
 
 
 const cookieparser = require("cookie-parser");
+const ffmpeg = require('ffmpeg');
+const { concat } = require('video-stitch');
+const { stderr } = require('process');
 
 require('dotenv').config();
 
@@ -95,12 +99,45 @@ app.post('/merge_image_and_audio',ensureToken,(req,res)=>{
 
 
 app.post('/merge_all_video',ensureToken,(req,res)=>{
-    const videoPaths = req.body.video_file_path_list
-    const videoFileNames = []
-    for( var i=0;i<videoPaths.length;i++){
-        const temp = videoPaths[i].split('/')
-        videoFileNames.push(temp[temp.length-1])
+    var list ='';
+    const videoPaths = req.body.video_file_path_list;
+
+    for(var i =0;i<videoPaths.length;i++){
+        if(fs.existsSync(videoPaths[i])){
+            list+= "file "
+            list += path.basename(videoPaths[i]);
+            list += '\n'
+        }
+        else{
+            return res.sendStatus(404);
+        }
     }
+
+    var listFilePath =  "public/upload/"+ Date.now()+'list.txt'
+    //console.log(listFilePath)
+    var writeStream  = fs.createWriteStream(listFilePath)
+    writeStream.write(list)
+    writeStream.end()
+
+    const outputFilePath = `public/upload/${req.cookies.token}_${Date.now()}output.mp4`
+    exec(`ffmpeg -safe 0 -f concat -i ${listFilePath} -c copy ${outputFilePath}`, (err,stdout)=>{
+        if(err){
+            console.log(err)
+            return;
+        }
+        else{
+            return res.json(
+                {
+                    "status": "ok",
+                    "message": "Merged All Video Successfully",
+                    "video_file_path": outputFilePath
+                }
+                
+            )
+        }
+    })
+
+
 
 })
 

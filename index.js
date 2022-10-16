@@ -104,9 +104,7 @@ app.post('/merge_all_video',ensureToken,(req,res)=>{
 
     for(var i =0;i<videoPaths.length;i++){
         if(fs.existsSync(videoPaths[i])){
-            list+= "file "
-            list += path.basename(videoPaths[i]);
-            list += '\n'
+            list += `file ${path.basename(videoPaths[i])}\n`
         }
         else{
             return res.sendStatus(404);

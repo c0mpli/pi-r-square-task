@@ -1,20 +1,14 @@
 const express = require('express');
-var jwt = require('jsonwebtoken');
 const multer= require('multer');
 const path = require('path');
 const fs = require('fs');
 const gTTS = require('gtts');
-let videoStitch = require('video-stitch');
 const {exec} = require('child_process')
-let videoMerge = videoStitch.merge;
-
 const { v4: uuidv4 } = require('uuid');
 
 
 const cookieparser = require("cookie-parser");
-const ffmpeg = require('ffmpeg');
-const { concat } = require('video-stitch');
-const { stderr } = require('process');
+
 
 require('dotenv').config();
 

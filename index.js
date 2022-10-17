@@ -82,10 +82,38 @@ app.post('/text_file_to_audio',ensureToken,(req,res)=>{
 app.post('/merge_image_and_audio',ensureToken,(req,res)=>{
     const {image_file_path} = req.body
     const {audio_file_path} = req.body
-    const outputFilePath = `public/upload/${req.cookies.token}_${Date.now()}output.mp4`
+    const outputFilePath = `public/upload/output/${req.cookies.token}_${Date.now()}output.mp4`
     //verify if file exists or no
     if(fs.existsSync(image_file_path) && fs.existsSync(audio_file_path)){
-        exec(` ffmpeg -loop 1 -y -i ${image_file_path} -i ${audio_file_path} -shortest ${outputFilePath}`, (err,stdout)=>{
+        exec(`ffmpeg -loop 1 -y -i ${image_file_path} -i ${audio_file_path} -shortest ${outputFilePath}`, (err,stdout)=>{
+            if(err){
+                console.log(err)
+                return;
+            }
+            else{
+                return res.json(
+                    {
+                        "status": "ok",
+                        "message": "Merged Image and Audio Successfully",
+                        "video_file_path": outputFilePath
+                    }
+                    
+                )
+            }
+        })
+    } else{
+        res.sendStatus(404);
+    }
+})
+
+app.post('/merge_video_and_audio',ensureToken,(req,res)=>{
+    const {video_file_path} = req.body
+    const {audio_file_path} = req.body
+    const outputFilePath = `public/upload/output/${req.cookies.token}_${Date.now()}output.mp4`
+    
+    //verify if file exists or no
+    if(fs.existsSync(video_file_path) && fs.existsSync(audio_file_path)){
+        exec(` ffmpeg -loop 1 -y -i ${video_file_path} -i ${audio_file_path} -shortest ${outputFilePath}`, (err,stdout)=>{
             if(err){
                 console.log(err)
                 return;
@@ -106,7 +134,6 @@ app.post('/merge_image_and_audio',ensureToken,(req,res)=>{
     }
 })
 
-
 app.post('/merge_all_video',ensureToken,(req,res)=>{
     var list ='';
     const videoPaths = req.body.video_file_path_list;
@@ -126,7 +153,7 @@ app.post('/merge_all_video',ensureToken,(req,res)=>{
     writeStream.write(list)
     writeStream.end()
 
-    const outputFilePath = `public/upload/${req.cookies.token}_${Date.now()}output.mp4`
+    const outputFilePath = `public/upload/output/${req.cookies.token}_${Date.now()}output.mp4`
     exec(`ffmpeg -safe 0 -f concat -i ${listFilePath} -c copy ${outputFilePath}`, (err,stdout)=>{
         if(err){
             console.log(err)
@@ -149,7 +176,7 @@ app.post('/merge_all_video',ensureToken,(req,res)=>{
 })
 
 
-app.get('/download_file',ensureToken,(req,res)=>{
+app.get('/download_file',(req,res)=>{
     const path = req.query.file_path 
     
     //verify if file exists or no

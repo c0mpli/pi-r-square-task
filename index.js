@@ -80,12 +80,27 @@ app.post('/text_file_to_audio',ensureToken,(req,res)=>{
 
 
 app.post('/merge_image_and_audio',ensureToken,(req,res)=>{
-    const {imagePath} = req.body
-    const {audioPath} = req.body
-
+    const {image_file_path} = req.body
+    const {audio_file_path} = req.body
+    const outputFilePath = `public/upload/${req.cookies.token}_${Date.now()}output.mp4`
     //verify if file exists or no
-    if(fs.existsSync(imagePath) && fs.existsSync(audioPath)){
-
+    if(fs.existsSync(image_file_path) && fs.existsSync(audio_file_path)){
+        exec(` ffmpeg -loop 1 -y -i ${image_file_path} -i ${audio_file_path} -shortest ${outputFilePath}`, (err,stdout)=>{
+            if(err){
+                console.log(err)
+                return;
+            }
+            else{
+                return res.json(
+                    {
+                        "status": "ok",
+                        "message": "Merged All Video Successfully",
+                        "video_file_path": outputFilePath
+                    }
+                    
+                )
+            }
+        })
     } else{
         res.sendStatus(404);
     }

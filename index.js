@@ -56,16 +56,18 @@ app.post('/upload_file',ensureToken,upload.single('my_file'),(req,res)=>{
 
 app.post('/text_file_to_audio',ensureToken,(req,res)=>{
     const { file_path } = req.body;
+    const outputPath = "public/upload/output/"+path.basename(file_path)
     //verify if file exists or no
     if(fs.existsSync(file_path)){
         
         const content = fs.readFileSync(file_path,'utf8');
         var gtts = new gTTS(content, 'en');
 
-        const filePathSplit = file_path.split('.');
+        const filePathSplit = outputPath.split('.');
         filePathSplit[filePathSplit.length - 1] = 'mp3';
         finalPathString = filePathSplit.join('.');
 
+        console.log(finalPathString)
         gtts.save(finalPathString, function() {
             return res.json({
                     "status": "ok",

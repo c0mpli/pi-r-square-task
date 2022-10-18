@@ -176,7 +176,7 @@ app.post('/merge_all_video',ensureToken,(req,res)=>{
 })
 
 
-app.get('/download_file',(req,res)=>{
+app.get('/download_file',ensureToken,(req,res)=>{
     const path = req.query.file_path 
     
     //verify if file exists or no

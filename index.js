@@ -147,7 +147,7 @@ app.post('/merge_all_video',ensureToken,(req,res)=>{
         }
     }
 
-    var listFilePath =  "public/upload/"+ Date.now()+'list.txt'
+    var listFilePath =  "public/upload/test/"+ Date.now()+'list.txt'
     //console.log(listFilePath)
     var writeStream  = fs.createWriteStream(listFilePath)
     writeStream.write(list)

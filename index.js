@@ -85,7 +85,7 @@ app.post('/merge_image_and_audio',ensureToken,(req,res)=>{
     const outputFilePath = `public/upload/output/${req.cookies.token}_${Date.now()}output.mp4`
     //verify if file exists or no
     if(fs.existsSync(image_file_path) && fs.existsSync(audio_file_path)){
-        exec(`ffmpeg -loop 1 -y -i ${image_file_path} -i ${audio_file_path} -shortest ${outputFilePath}`, (err,stdout)=>{
+        exec(`ffmpeg -framerate 1/5 -loop 1 -y -i ${image_file_path} -i ${audio_file_path} -c:v libx264 -c:a copy -shortest ${outputFilePath}`, (err,stdout)=>{
             if(err){
                 console.log(err)
                 return;
@@ -94,7 +94,7 @@ app.post('/merge_image_and_audio',ensureToken,(req,res)=>{
                 return res.json(
                     {
                         "status": "ok",
-                        "message": "Merged Image and Audio Successfully",
+                        "message": "Video Created Successfully",
                         "video_file_path": outputFilePath
                     }
                     
@@ -113,7 +113,7 @@ app.post('/merge_video_and_audio',ensureToken,(req,res)=>{
     
     //verify if file exists or no
     if(fs.existsSync(video_file_path) && fs.existsSync(audio_file_path)){
-        exec(` ffmpeg -loop 1 -y -i ${video_file_path} -i ${audio_file_path} -shortest ${outputFilePath}`, (err,stdout)=>{
+        exec(`ffmpeg -y -i ${video_file_path} -i ${audio_file_path}  -c:v copy -c:a copy  -map 0:v:0 -map 1:a:0  ${outputFilePath}`, (err,stdout)=>{
             if(err){
                 console.log(err)
                 return;
@@ -122,7 +122,7 @@ app.post('/merge_video_and_audio',ensureToken,(req,res)=>{
                 return res.json(
                     {
                         "status": "ok",
-                        "message": "Merged All Video Successfully",
+                        "message": "Video and Audio Merged Successfully",
                         "video_file_path": outputFilePath
                     }
                     
@@ -209,20 +209,6 @@ app.get('/my_upload_file',ensureToken,(req,res)=>{
         }
       })
 })
-
-
-
-//verify if correct token
-// function AuthMiddleware(req, res, next) {
-//     jwt.verify(req.token,process.env.TOKEN_SECRET,function(err,data){
-//         if(err){
-//             return res.sendStatus(403);
-//         } else {
-//             next();
-//         }
-//     });
-// }
-
 
 
 //ensure if token is present in cookies
